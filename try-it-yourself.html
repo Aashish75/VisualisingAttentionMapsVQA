@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualising Attention Maps - Try it Yourself</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="try-it-yourself.html" class="active">Try it Yourself</a>
+        <a href="citations.html">Citations</a>
+    </div>
+    <div class="container">
+        <h2>Method 1</h2>
+        <p>
+            <label>Input - Upload your Image:</label><br>
+            <input type="file" id="imageUpload" accept="image/*"><br>
+            <label>Input - Type your question:</label><br>
+            <input type="text" id="questionInput"><br>
+            <button onclick="runScript()">Run Script</button><br>
+            <p id="output">The python script runs<br>&lt;Displaying resulting attention Map as Image&gt;</p>
+        </p>
+        
+        <!-- Repeat for Method 2 and Method 3 if needed -->
+    </div>
+    <script>
+        function runScript() {
+            const output = document.getElementById("output");
+            output.innerHTML = "Processing...<br>&lt;Displaying resulting attention Map as Image&gt;";
+        }
+    </script>
+</body>
+</html>
