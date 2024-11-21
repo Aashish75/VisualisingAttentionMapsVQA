@@ -53,13 +53,13 @@
             border: 1px solid #ddd;
             cursor: pointer;
         }
-        .result-display {
+        .result-input {
             width: 100%;
-            max-height: 400px;
-            object-fit: cover;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 4px;
             border: 1px solid #ddd;
-            border-radius: 8px;
-            display: none; /* Hide initially */
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -86,11 +86,13 @@
             </select>
         </div>
 
-        <!-- Result Image Display -->
-        <img src="" alt="Result Image" id="resultImage" class="result-display">
+        <!-- Text box for displaying the result image URL -->
+        <input type="text" id="resultImageUrl" class="result-input" placeholder="Result Image URL will appear here" readonly>
     </div>
 
     <script>
+        const apiUrl = "https://huggingface.co/spaces/your-username/your-space-name/api/predict"; // Replace with your Hugging Face Space API endpoint
+
         // Placeholder functions to handle dropdown changes and display image
         function handleImageInputChange() {
             const inputType = document.getElementById("imageInput").value;
@@ -103,7 +105,6 @@
             } else if (inputType === "ex2") {
                 inputImage.src = "example2.jpg";
             } else if (inputType === "upload") {
-                // Handle file upload
                 const inputFile = document.createElement("input");
                 inputFile.type = "file";
                 inputFile.accept = "image/*";
@@ -113,7 +114,6 @@
                 };
                 inputFile.click();
             } else if (inputType === "camera") {
-                // Handle camera input (browser permissions required)
                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                     navigator.mediaDevices.getUserMedia({ video: true })
                         .then((stream) => {
@@ -139,11 +139,33 @@
 
         function handleMethodChange() {
             const method = document.getElementById("methodSelect").value;
-            const resultImage = document.getElementById("resultImage");
+            const resultImageUrl = document.getElementById("resultImageUrl");
+            const inputImage = document.getElementById("inputImage");
 
-            // Placeholder - Logic for applying method should go here
-            resultImage.src = "result-" + method + ".jpg"; // Replace with actual processing result
-            resultImage.style.display = "block"; // Show the result image
+            // Send the image data to Hugging Face Space API
+            sendImageToHuggingFace(inputImage.src, method)
+                .then(result => {
+                    resultImageUrl.value = result; // Display the result image URL in the text box
+                })
+                .catch(error => {
+                    console.error('Error fetching result:', error);
+                    alert('Error processing the image.');
+                });
+        }
+
+        async function sendImageToHuggingFace(imageSrc, method) {
+            const resultImageUrl = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    inputs: imageSrc, // The image URL or base64 string
+                    method: method
+                })
+            }).then(res => res.json());
+
+            return resultImageUrl.data[0]; // Assuming the response contains a processed image URL
         }
     </script>
 </body>
