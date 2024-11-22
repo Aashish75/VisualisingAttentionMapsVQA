@@ -91,7 +91,7 @@
     </div>
 
     <script>
-        const apiUrl = "https://huggingface.co/spaces/your-username/your-space-name/api/predict"; // Replace with your Hugging Face Space API endpoint
+        const apiUrl = "https://huggingface.co/spaces/Aashish75/AttentionVisualisationVQA/api/predict"; // Replace with your Hugging Face Space API endpoint
 
         // Placeholder functions to handle dropdown changes and display image
         function handleImageInputChange() {
@@ -157,12 +157,12 @@
             const resultImageUrl = await fetch(apiUrl, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": 'Bearer YOUR_HUGGINGFACE_API_TOKEN'
                 },
                 body: JSON.stringify({
-                    inputs: imageSrc, // The image URL or base64 string
-                    method: method
-                })
+                      data: [imageSrc, method], // Match Gradio input structure
+                      })
             }).then(res => res.json());
 
             return resultImageUrl.data[0]; // Assuming the response contains a processed image URL
