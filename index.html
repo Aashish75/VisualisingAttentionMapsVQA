@@ -53,18 +53,18 @@
             border: 1px solid #ddd;
             cursor: pointer;
         }
-        .result-input {
+        .result {
             width: 100%;
-            padding: 10px;
-            font-size: 1rem;
-            border-radius: 4px;
-            border: 1px solid #ddd;
             margin-top: 20px;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>Visualising attention maps as evidence for Visual Question Answering</h1>
+    <h1>Visualising Attention Maps as Evidence for Visual Question Answering</h1>
     <div class="container">
         <!-- Display Default or Uploaded Image -->
         <img src="default-image.jpg" alt="Default Image" id="inputImage" class="image-display">
@@ -79,21 +79,24 @@
                 <option value="ex2">Example Image 2</option>
             </select>
 
-            <select id="methodSelect" onchange="handleMethodChange()">
+            <select id="methodSelect">
                 <option value="method1">Method 1</option>
                 <option value="method2">Method 2</option>
                 <option value="method3">Method 3</option>
             </select>
         </div>
 
-        <!-- Text box for displaying the result image URL -->
-        <input type="text" id="resultImageUrl" class="result-input" placeholder="Result Image URL will appear here" readonly>
+        <!-- Button to Trigger API Call -->
+        <button onclick="handleMethodChange()">Process Image</button>
+
+        <!-- Section to Display Results -->
+        <div id="result" class="result"></div>
     </div>
 
     <script>
-        const apiUrl = "https://huggingface.co/spaces/Aashish75/https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict/"; // Replace with your Hugging Face Space API endpoint
+        const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict"; // Replace with your Hugging Face Space API endpoint
+        const authToken = "Bearer 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";
 
-        // Placeholder functions to handle dropdown changes and display image
         function handleImageInputChange() {
             const inputType = document.getElementById("imageInput").value;
             const inputImage = document.getElementById("inputImage");
@@ -137,35 +140,43 @@
             }
         }
 
-        function handleMethodChange() {
+        async function handleMethodChange() {
+            const inputImage = document.getElementById("inputImage").src;
             const method = document.getElementById("methodSelect").value;
-            const resultImageUrl = document.getElementById("resultImageUrl");
-            const inputImage = document.getElementById("inputImage");
 
-            // Send the image data to Hugging Face Space API
-            sendImageToHuggingFace(inputImage.src, method)
-                .then(result => {
-                    resultImageUrl.value = result; // Display the result image URL in the text box
-                })
-                .catch(error => {
-                    console.error('Error fetching result:', error);
-                    alert('Error processing the image.');
+            try {
+                // First POST request to get the event ID
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": authToken,
+                    },
+                    body: JSON.stringify({ data: [inputImage, method] }),
                 });
-        }
+                const data = await response.json();
+                const eventId = data.event_id;
 
-        async function sendImageToHuggingFace(imageSrc, method) {
-            const resultImageUrl = await fetch(apiUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": 'Bearer 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'
-                },
-                body: JSON.stringify({
-                      data: [imageSrc, method], // Match Gradio input structure
-                      })
-            }).then(res => res.json());
+                // Second GET request to get the processed image URL
+                const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": authToken,
+                    },
+                });
+                const resultData = await resultResponse.json();
+                const processedImageUrl = resultData.processed_image_url;
 
-            return resultImageUrl.data[0]; // Assuming the response contains a processed image URL
+                // Display the result image with error handling
+                document.getElementById("result").innerHTML = `
+                    <h2>Result:</h2>
+                    <img src="${processedImageUrl}" alt="Result Image" onerror="this.onerror=null; this.src='fallback-image.jpg'; document.getElementById('errorMessage').textContent='Unable to load the result image.';">
+                    <p id="errorMessage" class="error-message"></p>
+                `;
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById("result").innerHTML = `<p class="error-message">An error occurred while processing the image.</p>`;
+            }
         }
     </script>
 </body>
