@@ -180,11 +180,15 @@
             <p id="errorMessage" class="error-message"></p>
         `;
     } catch (error) {
-        console.error("Error:", error);
-        document.getElementById("result").innerHTML = `
-            <p class="error-message">An error occurred while processing the image.</p>
-        `;
-    }
+    console.error("Error:", error); // Logs the error in the browser console
+    document.getElementById("result").innerHTML = `
+        <p class="error-message">
+            An error occurred while processing the image. <br>
+            <strong>Error Details:</strong> ${error.message || "Unknown error"}
+        </p>
+    `;
+}
+
 }
     </script>
 </body>
