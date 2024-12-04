@@ -170,19 +170,16 @@
                 "Authorization": authToken,
             },
         });
-        /*
-        const resultData = await resultResponse.json();
         
-        const processedImageUrl = resultData.processed_image_url;
+        const resultData = await resultResponse.text();
+        
+        //const processedImageUrl = resultData.processed_image_url;
         
         // Display the processed image URL and result image
         document.getElementById("result").innerHTML += `
-            <p><strong>Processed Image URL:</strong> ${processedImageUrl}</p>
-            <h2>Result:</h2>
-            <img src="${processedImageUrl}" alt="Result Image" onerror="this.onerror=null; this.src='fallback-image.jpg'; document.getElementById('errorMessage').textContent='Unable to load the result image.';">
-            <p id="errorMessage" class="error-message"></p>
+            <p><strong>Processed Image URL:</strong> ${resultData}</p>
         `;
-        */
+        
     } catch (error) {
     console.error("Error:", error); // Logs the error in the browser console
     document.getElementById("result").innerHTML = `
