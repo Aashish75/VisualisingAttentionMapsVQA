@@ -163,6 +163,7 @@
         `;
 
         // Second GET request to get the processed image URL
+        /*
         const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
             method: "GET",
             headers: {
@@ -179,6 +180,7 @@
             <img src="${processedImageUrl}" alt="Result Image" onerror="this.onerror=null; this.src='fallback-image.jpg'; document.getElementById('errorMessage').textContent='Unable to load the result image.';">
             <p id="errorMessage" class="error-message"></p>
         `;
+        */
     } catch (error) {
     console.error("Error:", error); // Logs the error in the browser console
     document.getElementById("result").innerHTML = `
