@@ -163,7 +163,7 @@
         `;
 
         // Second GET request to get the processed image URL
-        /*
+        
         const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
             method: "GET",
             headers: {
@@ -171,8 +171,9 @@
             },
         });
         const resultData = await resultResponse.json();
+        /*
         const processedImageUrl = resultData.processed_image_url;
-
+        
         // Display the processed image URL and result image
         document.getElementById("result").innerHTML += `
             <p><strong>Processed Image URL:</strong> ${processedImageUrl}</p>
