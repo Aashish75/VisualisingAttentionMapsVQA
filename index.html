@@ -141,43 +141,51 @@
         }
 
         async function handleMethodChange() {
-            const inputImage = document.getElementById("inputImage").src;
-            const method = document.getElementById("methodSelect").value;
+    const inputImage = document.getElementById("inputImage").src;
+    const method = document.getElementById("methodSelect").value;
 
-            try {
-                // First POST request to get the event ID
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": authToken,
-                    },
-                    body: JSON.stringify({ data: [inputImage, method] }),
-                });
-                const data = await response.json();
-                const eventId = data.event_id;
+    try {
+        // First POST request to get the event ID
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": authToken,
+            },
+            body: JSON.stringify({ data: [inputImage, method] }),
+        });
+        const data = await response.json();
+        const eventId = data.event_id;
 
-                // Second GET request to get the processed image URL
-                const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": authToken,
-                    },
-                });
-                const resultData = await resultResponse.json();
-                const processedImageUrl = resultData.processed_image_url;
+        // Display the event ID on the page
+        document.getElementById("result").innerHTML = `
+            <p><strong>Event ID:</strong> ${eventId}</p>
+        `;
 
-                // Display the result image with error handling
-                document.getElementById("result").innerHTML = `
-                    <h2>Result:</h2>
-                    <img src="${processedImageUrl}" alt="Result Image" onerror="this.onerror=null; this.src='fallback-image.jpg'; document.getElementById('errorMessage').textContent='Unable to load the result image.';">
-                    <p id="errorMessage" class="error-message"></p>
-                `;
-            } catch (error) {
-                console.error("Error:", error);
-                document.getElementById("result").innerHTML = `<p class="error-message">An error occurred while processing the image.Processed image URL: ${processedImageUrl}</p>`;
-            }
-        }
+        // Second GET request to get the processed image URL
+        const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
+            method: "GET",
+            headers: {
+                "Authorization": authToken,
+            },
+        });
+        const resultData = await resultResponse.json();
+        const processedImageUrl = resultData.processed_image_url;
+
+        // Display the processed image URL and result image
+        document.getElementById("result").innerHTML += `
+            <p><strong>Processed Image URL:</strong> ${processedImageUrl}</p>
+            <h2>Result:</h2>
+            <img src="${processedImageUrl}" alt="Result Image" onerror="this.onerror=null; this.src='fallback-image.jpg'; document.getElementById('errorMessage').textContent='Unable to load the result image.';">
+            <p id="errorMessage" class="error-message"></p>
+        `;
+    } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("result").innerHTML = `
+            <p class="error-message">An error occurred while processing the image.</p>
+        `;
+    }
+}
     </script>
 </body>
 </html>
