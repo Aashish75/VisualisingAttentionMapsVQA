@@ -28,7 +28,7 @@ jobs:
       - name: Build Static Site
         run: |
           mkdir -p _site
-          cp -r * _site/
+          find . -maxdepth 1 -not -name "_site" -not -name "." -exec cp -r {} _site/ \;
 
       - name: Deploy to GitHub Pages
         uses: actions/upload-pages-artifact@v1
