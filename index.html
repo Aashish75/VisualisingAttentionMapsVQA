@@ -41,7 +41,7 @@
         .dropdown {
             width: 100%;
             display: flex;
-            justify-content: space-between;
+            justify-content: center; /* Center the dropdown */
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -111,9 +111,9 @@
             if (inputType === "default") {
                 inputImage.src = "default-image.jpg";
             } else if (inputType === "ex1") {
-                inputImage.src = "example1.jpg";
+                inputImage.src = "example1.png";
             } else if (inputType === "ex2") {
-                inputImage.src = "example2.jpg";
+                inputImage.src = "example2.png";
             } else if (inputType === "upload") {
                 const inputFile = document.createElement("input");
                 inputFile.type = "file";
