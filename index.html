@@ -188,14 +188,42 @@
                         "Content-Type": "application/json",
                         "Authorization": authToken,
                     },
-                    body: JSON.stringify({ data: [base64Image, additionalText] }),
+                    body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
                 });
                 const data = await response.json();
-                const processedImageBase64 = data.data[0].output;
+                const eventId = data.event_id;
 
+                // Display the event ID on the page
                 document.getElementById("result").innerHTML = `
-                    <img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>
+                    <p><strong>Event ID:</strong> ${eventId}</p>
                 `;
+
+                // Second GET request to get the processed image URL
+                const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": authToken,
+                    },
+                });
+                
+                const resultText = await resultResponse.text();
+                
+                if (resultResponse.status === 200) {
+                    // Extract and display the JSON data
+                    if (resultText.includes('data:')) {
+                        const dataLine = resultText.split('\n').find(line => line.startsWith('data: '));
+                        const jsonData = JSON.parse(dataLine.substring(6).trim());
+                        const processedImageBase64 = jsonData[0].output;
+                        
+                        document.getElementById("result").innerHTML += `
+                            <img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>
+                        `;
+                    } else {
+                        throw new Error("Processed image data not found in response.");
+                    }
+                } else {
+                    throw new Error(`Failed to get results. HTTP status: ${resultResponse.status}`);
+                }
             } catch (error) {
                 console.error("Error:", error);
                 document.getElementById("result").innerHTML = `
