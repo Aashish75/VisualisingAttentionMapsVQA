@@ -15,12 +15,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated to latest version
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # Updated to latest version
         with:
-          node-version: 16
+          node-version: 18  # Updated from 16 to 18 for better compatibility
 
       - name: Inject Hugging Face Token
         env:
@@ -34,8 +34,8 @@ jobs:
           mkdir -p _site
           find . -maxdepth 1 -not -name "_site" -not -name "." -exec cp -r {} _site/ \;
 
-      - name: Deploy to GitHub Pages
-        uses: actions/upload-pages-artifact@v4
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v1  # Use v1 for Pages artifacts
         with:
           path: _site
 
