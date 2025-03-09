@@ -1,9 +1,10 @@
+
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main  # Runs on every push to the `main` branch
+      - main
 
 jobs:
   build-and-deploy:
@@ -15,17 +16,12 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4  # ✅ Latest version
-
-      - name: Cache APT Packages (Fix for stale dependencies)
-        uses: awalsh128/cache-apt-pkgs-action@v1.4.3  # ✅ Fix caching issues
-        with:
-          packages: "curl git"
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4  # ✅ Latest version
+        uses: actions/setup-node@v4
         with:
-          node-version: 18  # Updated for better compatibility
+          node-version: 16
 
       - name: Inject Hugging Face Token
         env:
@@ -33,24 +29,14 @@ jobs:
         run: |
           npm install fs path
           node scripts/inject-token.js
-
       - name: Build Static Site
         run: |
           mkdir -p _site
           find . -maxdepth 1 -not -name "_site" -not -name "." -exec cp -r {} _site/ \;
-
-      # ✅ Debugging Step: Ensure `_site` exists before uploading
-      - name: Debug: Check _site directory
-        run: |
-          echo "Listing _site directory contents:"
-          ls -la _site || echo "_site directory NOT FOUND"
-
-      # ✅ Upload the artifact with the correct name
-      - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v2  # ✅ Latest version
+      - name: Deploy to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: _site  # ✅ Ensure path exists
+          path: _site
 
-      # ✅ Deploy the uploaded artifact
       - name: Deploy Artifact
-        uses: actions/deploy-pages@v2  # ✅ Latest version
+        uses: actions/deploy-pages@v2
