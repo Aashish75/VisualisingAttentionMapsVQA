@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - main  # Runs on every push to the `main` branch
 
 jobs:
   build-and-deploy:
@@ -17,10 +17,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4  # ✅ Latest version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Cache APT Packages (Fix for stale dependencies)
+        uses: awalsh128/cache-apt-pkgs-action@v1.4.3  # ✅ Fix caching issues
         with:
-          node-version: 18  # Ensure compatibility
+          packages: "curl git"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4  # ✅ Latest version
+        with:
+          node-version: 18  # Updated for better compatibility
 
       - name: Inject Hugging Face Token
         env:
@@ -29,23 +34,26 @@ jobs:
           npm install fs path
           node scripts/inject-token.js
 
-      # ✅ Build the static site
       - name: Build Static Site
         run: |
           mkdir -p _site
-          echo "<h1>Deployed Successfully</h1>" > _site/index.html  # Placeholder to confirm _site is created
+          find . -maxdepth 1 -not -name "_site" -not -name "." -exec cp -r {} _site/ \;
 
-      # ✅ Debug: Check if _site directory exists
-      - name: Debug Check _site directory
-        run: ls -la _site || echo "_site directory NOT FOUND"
+      # ✅ Debugging Step: Ensure `_site` exists before uploading
+      - name: Debug: Check _site directory
+        run: |
+          echo "Listing _site directory contents:"
+          ls -la _site || echo "_site directory NOT FOUND"
 
-      # ✅ Upload only if _site exists
+      # ✅ Upload the artifact with the correct name
       - name: Upload GitHub Pages Artifact
-        if: success()
-        uses: actions/upload-pages-artifact@v3  # ✅ Correct version
+        uses: actions/upload-pages-artifact@v3  # ✅ Latest version
         with:
+          name: github-pages  # Ensures this matches deploy step
           path: _site
 
-      # ✅ Deploy the artifact
+      # ✅ Deploy the uploaded artifact
       - name: Deploy Artifact
         uses: actions/deploy-pages@v2  # ✅ Latest version
+        with:
+          artifact_name: github-pages  # Ensure this matches upload step
