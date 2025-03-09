@@ -1,0 +1,101 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Georgia, serif;
+    background-color: #f4f9ff;
+    color: #333;
+}
+
+.navbar {
+    background-color: #333;
+    padding: 1em;
+    text-align: center;
+}
+
+.navbar a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar a.active {
+    color: #1e90ff;
+}
+
+.content {
+    display: flex;
+    margin-top: 1em;
+}
+
+.sidebar {
+    width: 200px;
+    padding: 20px;
+    background-color: #f0f4ff;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.sidebar a {
+    display: block;
+    color: #333;
+    padding: 10px;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-family: Arial, sans-serif;
+}
+
+.sidebar a.active {
+    background-color: #1e90ff;
+    color: white;
+    border-radius: 4px;
+}
+
+.sidebar a:hover {
+    background-color: #d0e8ff;
+    color: #333;
+}
+
+.container {
+    flex: 1;
+    padding: 20px 40px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h3 {
+    font-family: Arial, sans-serif;
+    margin-bottom: 15px;
+}
+
+h1 {
+    color: #1e90ff;
+}
+
+hr {
+    border: none;
+    border-top: 2px solid #ddd;
+    margin-bottom: 15px;
+}
+/* Style for input fields */
+input[type="file"],
+input[type="text"] {
+    display: block;
+    margin: 10px 0 20px;
+    padding: 8px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+input[type="file"]:hover,
+input[type="text"]:hover {
+    border-color: #1e90ff;
+}
