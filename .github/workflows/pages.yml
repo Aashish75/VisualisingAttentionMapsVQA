@@ -36,8 +36,6 @@ jobs:
 
       - name: Upload GitHub Pages Artifact  # ✅ Use correct action for Pages
         uses: actions/upload-pages-artifact@v3  # ✅ Should be `v1`
-        with:
-          path: _site  # Ensure `_site` exists
 
       - name: Deploy Artifact
         uses: actions/deploy-pages@v2  # ✅ Deploy using correct action
