@@ -32,14 +32,14 @@ jobs:
       - name: Build Static Site
         run: |
           mkdir -p _site
-          find . -maxdepth 1 -not -name "_site" -not -name "." -exec cp -r {} _site/ \;
+          find . -maxdepth 1 -not -name "_site" -not -name "." -not -name ".git" -not -name ".github" -exec cp -r {} _site/ \;
 
       - name: Verify _site contents
         run: |
           ls -la _site
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
           path: _site
