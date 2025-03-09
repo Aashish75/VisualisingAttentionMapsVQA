@@ -42,7 +42,7 @@ jobs:
       # ✅ Upload only if _site exists
       - name: Upload GitHub Pages Artifact
         if: success()
-        uses: actions/upload-pages-artifact@v3  # ✅ Correct version
+        uses: actions/upload-pages-artifact@v2  # ✅ Correct version
         with:
           path: _site
 
