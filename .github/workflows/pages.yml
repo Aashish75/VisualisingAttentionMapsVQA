@@ -40,7 +40,7 @@ jobs:
           ls -la _site
 
       - name: Upload artifact
-        uses: actions/actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: github-pages
           path: _site
