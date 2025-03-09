@@ -47,13 +47,10 @@ jobs:
 
       # ✅ Upload the artifact with the correct name
       - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v3  # ✅ Latest version
+        uses: actions/upload-pages-artifact@v2  # ✅ Latest version
         with:
-          name: github-pages  # Ensures this matches deploy step
-          path: _site
+          path: _site  # ✅ Ensure path exists
 
       # ✅ Deploy the uploaded artifact
       - name: Deploy Artifact
         uses: actions/deploy-pages@v2  # ✅ Latest version
-        with:
-          artifact_name: github-pages  # Ensure this matches upload step
