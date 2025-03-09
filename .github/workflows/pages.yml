@@ -35,8 +35,8 @@ jobs:
           mkdir -p _site
           echo "<h1>Deployed Successfully</h1>" > _site/index.html  # Placeholder to confirm _site is created
 
-      # ✅ Debug: Check if _site exists
-      - name: Debug: Check _site directory
+      # ✅ Debug: Check if _site directory exists
+      - name: Debug Check _site directory
         run: ls -la _site || echo "_site directory NOT FOUND"
 
       # ✅ Upload only if _site exists
