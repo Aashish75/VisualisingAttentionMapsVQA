@@ -52,3 +52,6 @@ jobs:
 
       - name: Deploy Artifact
         uses: actions/deploy-pages@v2  # ✅ Latest version
+
+# Small change to trigger GitHub to update actions
+# Deploy to GitHub Pages
