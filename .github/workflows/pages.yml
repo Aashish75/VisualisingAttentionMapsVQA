@@ -12,6 +12,7 @@ jobs:
       id-token: write
       contents: read
       pages: write
+      actions: write
 
     steps:
       - name: Checkout Code
