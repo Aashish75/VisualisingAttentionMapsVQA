@@ -51,7 +51,7 @@ jobs:
           path: _site
 
       - name: Deploy Artifact
-        uses: actions/deploy-pages@v2  # ✅ Latest version
+        uses: actions/deploy-pages@v3  # ✅ Latest version
 
 # Small change to trigger GitHub to update actions
 # Deploy to GitHub Pages
