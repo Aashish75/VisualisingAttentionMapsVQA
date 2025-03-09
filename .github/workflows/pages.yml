@@ -46,7 +46,7 @@ jobs:
           path: _site
 
       - name: Upload GitHub Pages Artifact
-        uses: actions/upload-pages-artifact@v2  # ✅ Fixed: Updated to v2
+        uses: actions/upload-pages-artifact@v3  # ✅ Fixed: Updated to v2
         with:
           path: _site
 
