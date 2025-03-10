@@ -33,7 +33,10 @@ jobs:
       - name: Build Static Site
         run: |
           mkdir -p _site
-          find . -maxdepth 1 -not -name "_site" -not -name "." -exec cp -r {} _site/ \;
+          shopt -s dotglob  # Include hidden files
+          cp -r * _site/ || true
+          shopt -u dotglob  # Disable dotglob
+          rm -rf _site/_site  # Remove the _site directory if it was copied into itself
 
       - name: Verify _site contents
         run: |
