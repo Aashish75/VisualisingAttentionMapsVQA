@@ -48,4 +48,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: _site
           publish_branch: gh-pages
-          allow_empty_commit: true  # Allow empty commits
+          allow_empty_commit: true  # Allow empty commitss
