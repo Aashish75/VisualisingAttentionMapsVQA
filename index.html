@@ -18,6 +18,29 @@
             color: #007bff;
             margin-bottom: 20px;
         }
+        .instructions {
+            width: 100%;
+            background: #e9f5ff;
+            border-left: 5px solid #007bff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #333;
+            margin-top: 20px;
+        }
+        .instructions h3 {
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+            color: #0056b3;
+        }
+        .instructions ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
         .container {
             max-width: 800px;
             width: 100%;
@@ -90,6 +113,18 @@
         <input type="text" id="additionalText" placeholder="Enter text" />
 
         <button onclick="handleMethodChange()">Process Image</button>
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ul>
+                <li>✅ We recommend using the <strong>default image</strong> to begin with (it’s small and quick to process).</li>
+                <li>✅ Type some <strong>relevant text</strong> in the input field.</li>
+                <li>✅ Click on <strong>Process</strong> and wait for the results.</li>
+                <li>⏳ If you don’t see the Event ID or the output visualization, the backend app may still be initializing. <strong>Wait for 5 minutes</strong> and try again.</li>
+                <li>🧠 This uses a <strong>Grad-CAM based approach</strong> for visualizing attention in Visual Question Answering.</li>
+                <li>🚀 Backend runs on <strong>Hugging Face Spaces</strong> and frontend is built with <strong>HTML, CSS, and JavaScript</strong>.</li>
+                <li>🔑 The <strong>HF API token</strong> is injected via a custom GitHub Actions workflow.</li>
+            </ul>
+        </div>
 
         <div id="result" class="result"></div>
     </div>
