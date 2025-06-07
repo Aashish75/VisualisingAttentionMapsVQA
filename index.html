@@ -1,274 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attention Visualization</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-        .instructions {
-            width: 100%;
-            background: #e9f5ff;
-            border-left: 5px solid #007bff;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            color: #333;
-            margin-top: 20px;
-        }
-        .instructions h3 {
-            margin: 0 0 10px;
-            font-size: 1.1rem;
-            color: #0056b3;
-        }
-        .instructions ul {
-            padding-left: 20px;
-            margin: 0;
-        }
-        .instructions li {
-            margin-bottom: 5px;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .image-display {
-            width: 100%;
-            max-height: 400px;
-            object-fit: cover;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .dropdown {
-            width: 100%;
-            display: flex;
-            justify-content: center; /* Center the dropdowns */
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        select, button, input[type="text"] {
-            width: 48%;
-            padding: 8px;
-            font-size: 1rem;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            cursor: pointer;
-        }
-        .result {
-            width: 100%;
-            margin-top: 20px;
-        }
-        .error-message {
-            color: red;
-            margin-top: 10px;
-        }
-        video {
-            display: none;
-            max-width: 100%;
-            max-height: 400px;
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Attention Visualization</title>
+  <style>
+    /* (no changes to CSS) */
+    body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #f8f9fa; margin: 0; padding: 20px; }
+    h1 { color: #007bff; margin-bottom: 20px; }
+    .instructions { width: 100%; background: #e9f5ff; border-left: 5px solid #007bff; padding: 10px; border-radius: 5px; font-size: 0.9rem; color: #333; margin-top: 20px; }
+    .instructions h3 { margin: 0 0 10px; font-size: 1.1rem; color: #0056b3; }
+    .instructions ul { padding-left: 20px; margin: 0; }
+    .instructions li { margin-bottom: 5px; }
+    .container { max-width: 800px; width: 100%; display: flex; flex-direction: column; align-items: center; border: 1px solid #ddd; border-radius: 8px; padding: 20px; background-color: #fff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .image-display { width: 100%; max-height: 400px; object-fit: cover; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; }
+    .dropdown { width: 100%; display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+    select, button, input[type="text"] { width: 48%; padding: 8px; font-size: 1rem; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; }
+    .result { width: 100%; margin-top: 20px; }
+    .error-message { color: red; margin-top: 10px; }
+    video { display: none; max-width: 100%; max-height: 400px; margin-bottom: 20px; }
+  </style>
 </head>
 <body>
-    <h1>Visualizing Attention Maps as Evidence for Visual Question Answering</h1>
-    <div class="container">
-        <img src="example1.png" alt="Default Image" id="inputImage" class="image-display">
-        <video id="video" class="image-display"></video>
-        <button id="captureButton" style="display: none;" onclick="captureImage()">Capture</button>
-        
-        <div class="dropdown">
-            <select id="imageInput" onchange="handleImageInputChange()">
-                <option value="default">Use Default Image</option>
-                <option value="camera">Take a Picture</option>
-                <option value="upload">Select from Computer</option>
-                <option value="ex1">Example Image 1</option>
-                <option value="ex2">Example Image 2</option>
-            </select>
-        </div>
+  <h1>Visualizing Attention Maps as Evidence for Visual Question Answering</h1>
+  <div class="container">
+    <img src="example1.png" alt="Default Image" id="inputImage" class="image-display">
+    <video id="video" class="image-display"></video>
+    <button id="captureButton" style="display: none;" onclick="captureImage()">Capture</button>
 
-        <!-- Additional Text Input Here -->
-        <input type="text" id="additionalText" placeholder="Enter text" />
-
-        <button onclick="handleMethodChange()">Process Image</button>
-        <div class="instructions">
-            <h3>Instructions:</h3>
-            <ul>
-                <li>✅ We recommend using the <strong>default image</strong> to begin with (it’s small and quick to process).</li>
-                <li>✅ Type some <strong>relevant text</strong> in the input field.</li>
-                <li>✅ Click on <strong>Process</strong> and wait for the results.</li>
-                <li>⏳ If you don’t see the Event ID or the output visualization, the backend app may still be initializing. <strong>Wait for 5 minutes</strong> and try again.</li>
-                <li>🧠 This uses a <strong>Grad-CAM based approach</strong> for visualizing attention in Visual Question Answering.</li>
-                <li>🚀 Backend runs on <strong>Hugging Face Spaces</strong> and frontend is built with <strong>HTML, CSS, and JavaScript</strong>.</li>
-                <li>🔑 The <strong>HF API token</strong> is injected via a custom GitHub Actions workflow.</li>
-            </ul>
-        </div>
-
-        <div id="result" class="result"></div>
+    <div class="dropdown">
+      <select id="imageInput" onchange="handleImageInputChange()">
+        <option value="default">Use Default Image</option>
+        <option value="camera">Take a Picture</option>
+        <option value="upload">Select from Computer</option>
+        <option value="ex1">Example Image 1</option>
+        <option value="ex2">Example Image 2</option>
+      </select>
     </div>
 
-    <script>
-        const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict"; 
-        const authToken = "Bearer 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";
-        let videoStream;
+    <input type="text" id="additionalText" placeholder="Enter text" />
+    <button onclick="handleMethodChange()">Process Image</button>
 
-        function handleImageInputChange() {
-            const inputType = document.getElementById("imageInput").value;
-            const inputImage = document.getElementById("inputImage");
-            const videoElement = document.getElementById("video");
-            const captureButton = document.getElementById("captureButton");
+    <div class="instructions">
+      <h3>Instructions:</h3>
+      <ul>
+        <li>✅ We recommend using the <strong>default image</strong> to begin with (it’s small and quick to process).</li>
+        <li>✅ Type some <strong>relevant text</strong> in the input field.</li>
+        <li>✅ Click on <strong>Process</strong> and wait for the results.</li>
+        <li>⏳ If you don’t see the Event ID or the output visualization, the backend app may still be initializing. <strong>Wait for 5 minutes</strong> and try again.</li>
+        <li>🧠 This uses a <strong>Grad-CAM based approach</strong> for visualizing attention in Visual Question Answering.</li>
+        <li>🚀 Backend runs on <strong>Hugging Face Spaces</strong> and frontend is built with <strong>HTML, CSS, and JavaScript</strong>.</li>
+        <li>🔑 The <strong>HF API token</strong> is injected via a custom GitHub Actions workflow.</li>
+      </ul>
+    </div>
 
-            videoElement.style.display = "none";
-            captureButton.style.display = "none";
+    <div id="result" class="result"></div>
+  </div>
 
-            if (inputType === "default") {
-                inputImage.src = "default-image.jpg";
-            } else if (inputType === "ex1") {
-                inputImage.src = "example1.png";
-            } else if (inputType === "ex2") {
-                inputImage.src = "example2.png";
-            } else if (inputType === "upload") {
-                const inputFile = document.createElement("input");
-                inputFile.type = "file";
-                inputFile.accept = "image/*";
-                inputFile.onchange = (e) => {
-                    const file = e.target.files[0];
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        inputImage.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                };
-                inputFile.click();
-            } else if (inputType === "camera") {
-                videoElement.style.display = "block";
-                captureButton.style.display = "block";
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: true })
-                        .then((stream) => {
-                            videoStream = stream;
-                            videoElement.srcObject = stream;
-                            videoElement.play();
-                        });
-                } else {
-                    alert("Camera is not supported on this device");
-                }
-            }
+  <script>
+    const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict"; 
+    const authToken = "Bearer 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";
+    let videoStream;
+
+    function timeoutPromise(ms) {
+      return new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), ms));
+    }
+
+    async function fetchWithTimeoutAndRetry(fetchFunction, maxWait = 34000, totalTimeout = 50000) {
+      try {
+        return await Promise.race([fetchFunction(), timeoutPromise(maxWait)]);
+      } catch (err) {
+        // Retry once after 34 seconds
+        try {
+          return await Promise.race([fetchFunction(), timeoutPromise(totalTimeout - maxWait)]);
+        } catch (finalError) {
+          throw new Error("Request failed after retrying.");
         }
+      }
+    }
 
-        function captureImage() {
-            const videoElement = document.getElementById("video");
-            const inputImage = document.getElementById("inputImage");
-            const canvas = document.createElement("canvas");
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            const context = canvas.getContext("2d");
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-            inputImage.src = canvas.toDataURL("image/png");
-            videoStream.getTracks().forEach(track => track.stop());
-            videoElement.style.display = "none";
-            document.getElementById("captureButton").style.display = "none";
+    function handleImageInputChange() {
+      const inputType = document.getElementById("imageInput").value;
+      const inputImage = document.getElementById("inputImage");
+      const videoElement = document.getElementById("video");
+      const captureButton = document.getElementById("captureButton");
+
+      videoElement.style.display = "none";
+      captureButton.style.display = "none";
+
+      if (inputType === "default") {
+        inputImage.src = "default-image.jpg";
+      } else if (inputType === "ex1") {
+        inputImage.src = "example1.png";
+      } else if (inputType === "ex2") {
+        inputImage.src = "example2.png";
+      } else if (inputType === "upload") {
+        const inputFile = document.createElement("input");
+        inputFile.type = "file";
+        inputFile.accept = "image/*";
+        inputFile.onchange = (e) => {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            inputImage.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        };
+        inputFile.click();
+      } else if (inputType === "camera") {
+        videoElement.style.display = "block";
+        captureButton.style.display = "block";
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+            videoStream = stream;
+            videoElement.srcObject = stream;
+            videoElement.play();
+          });
+        } else {
+          alert("Camera is not supported on this device");
         }
+      }
+    }
 
-        async function handleMethodChange() {
-            const inputImageElement = document.getElementById("inputImage");
-            const inputImageSrc = inputImageElement.src;
-            const additionalText = document.getElementById("additionalText").value.trim();
+    function captureImage() {
+      const videoElement = document.getElementById("video");
+      const inputImage = document.getElementById("inputImage");
+      const canvas = document.createElement("canvas");
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const context = canvas.getContext("2d");
+      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      inputImage.src = canvas.toDataURL("image/png");
+      videoStream.getTracks().forEach(track => track.stop());
+      videoElement.style.display = "none";
+      document.getElementById("captureButton").style.display = "none";
+    }
 
-            if (!additionalText) {
-                alert("Please enter text before processing the image.");
-                return;
-            }
+    async function handleMethodChange() {
+      const inputImageElement = document.getElementById("inputImage");
+      const inputImageSrc = inputImageElement.src;
+      const additionalText = document.getElementById("additionalText").value.trim();
 
-            let base64Image;
-            if (inputImageSrc.startsWith('data:image')) {
-                base64Image = inputImageSrc.split(',')[1];
-            } else {
-                base64Image = await fetch(inputImageSrc)
-                    .then(response => response.blob())
-                    .then(blob => new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                        reader.onerror = reject;
-                        reader.readAsDataURL(blob);
-                    }));
-            }
+      if (!additionalText) {
+        alert("Please enter text before processing the image.");
+        return;
+      }
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": authToken,
-                    },
-                    body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
-                });
-                const data = await response.json();
-                const eventId = data.event_id;
+      let base64Image;
+      if (inputImageSrc.startsWith('data:image')) {
+        base64Image = inputImageSrc.split(',')[1];
+      } else {
+        base64Image = await fetch(inputImageSrc)
+          .then(response => response.blob())
+          .then(blob => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          }));
+      }
 
-                // Display the event ID on the page
-                document.getElementById("result").innerHTML = `
-                    <p><strong>Event ID:</strong> ${eventId}</p>
-                `;
+      try {
+        const response = await fetchWithTimeoutAndRetry(() => fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": authToken,
+          },
+          body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
+        }));
 
-                // Second GET request to get the processed image URL
-                const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": authToken,
-                    },
-                });
-                
-                const resultText = await resultResponse.text();
-                
-                if (resultResponse.status === 200) {
-                    // Extract and display the JSON data
-                    if (resultText.includes('data:')) {
-                        const dataLine = resultText.split('\n').find(line => line.startsWith('data: '));
-                        const jsonData = JSON.parse(dataLine.substring(6).trim());
-                        const processedImageBase64 = jsonData[0].output;
-                        
-                        document.getElementById("result").innerHTML += `
-                            <img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>
-                        `;
-                    } else {
-                        throw new Error("Processed image data not found in response.");
-                    }
-                } else {
-                    throw new Error(`Failed to get results. HTTP status: ${resultResponse.status}`);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                document.getElementById("result").innerHTML = `
-                    <p class="error-message">
-                        An error occurred while processing the image. <br>
-                        <strong>Error Details:</strong> ${error.message || "Unknown error"}
-                    </p>
-                `;
-            }
+        const data = await response.json();
+        const eventId = data.event_id;
+
+        document.getElementById("result").innerHTML = `
+          <p><strong>Event ID:</strong> ${eventId}</p>
+        `;
+
+        const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
+          method: "GET",
+          headers: {
+            "Authorization": authToken,
+          },
+        });
+
+        const resultText = await resultResponse.text();
+
+        if (resultResponse.status === 200 && resultText.includes('data:')) {
+          const dataLine = resultText.split('\n').find(line => line.startsWith('data: '));
+          const jsonData = JSON.parse(dataLine.substring(6).trim());
+          const processedImageBase64 = jsonData[0].output;
+
+          document.getElementById("result").innerHTML += `
+            <img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>
+          `;
+        } else {
+          throw new Error("Processed image data not found.");
         }
-    </script>
+      } catch (error) {
+        document.getElementById("result").innerHTML = `
+          <p class="error-message">
+            An error occurred while processing the image. <br>
+            <strong>Error Details:</strong> ${error.message || "Unknown error"}
+          </p>
+        `;
+      }
+    }
+  </script>
 </body>
 </html>
