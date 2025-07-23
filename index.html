@@ -60,7 +60,7 @@
 
   <script>
     const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict"; 
-    const authToken = "Bearer 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";
+    const authToken = "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";
     let videoStream;
 
     function timeoutPromise(ms) {
@@ -71,7 +71,7 @@
       try {
         return await Promise.race([fetchFunction(), timeoutPromise(maxWait)]);
       } catch (err) {
-        // Retry once after 34 seconds
+        // Retrying once after 34 seconds. 
         try {
           return await Promise.race([fetchFunction(), timeoutPromise(totalTimeout - maxWait)]);
         } catch (finalError) {
