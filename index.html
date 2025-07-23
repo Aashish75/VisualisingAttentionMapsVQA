@@ -71,7 +71,7 @@
       try {
         return await Promise.race([fetchFunction(), timeoutPromise(maxWait)]);
       } catch (err) {
-        // Retry once after 34 seconds
+        // Retrying once after 34 seconds. 
         try {
           return await Promise.race([fetchFunction(), timeoutPromise(totalTimeout - maxWait)]);
         } catch (finalError) {
