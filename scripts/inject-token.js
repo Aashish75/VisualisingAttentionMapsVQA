@@ -9,7 +9,7 @@ let content = fs.readFileSync(indexPath, "utf8");
 // Replace the placeholder with the environment variable
 const hfToken = process.env.HF_AUTH_TOKEN;
 if (!hfToken) {
-  console.error("HF_AUTH_TOKEN environment variable is not set.");
+  console.error("HF_AUTH_TOKEN environment variable is really not set.");
   process.exit(1);
 }
 
