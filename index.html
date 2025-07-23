@@ -155,7 +155,6 @@
       const pollRetries = 20;
       const pollDelay = 3000;
       const cycleDelay = 10000;
-
       let gotResult = false;
 
       for (let cycle = 1; cycle <= maxCycles && !gotResult; cycle++) {
@@ -170,7 +169,6 @@
           resultDiv.innerHTML = `<p><strong>Event ID (try ${cycle}):</strong> ${eventId}</p>`;
 
           let retries = 0;
-
           while (retries < pollRetries && !gotResult) {
             try {
               const resultResponse = await fetch(`${apiUrl}/${eventId}`);
@@ -187,8 +185,13 @@
                 gotResult = true;
               }
             } catch (e) {}
+
+            // Updated progress range logic
+            const cycleStart = cycle === 1 ? 0 : (cycle === 2 ? 75 : 90);
+            const cycleEnd = cycle === 1 ? 75 : (cycle === 2 ? 90 : 100);
+            progressBar.value = cycleStart + ((cycleEnd - cycleStart) * (retries / pollRetries));
+
             retries++;
-            progressBar.value = Math.min(100, (retries / pollRetries) * 100);
             await new Promise(res => setTimeout(res, pollDelay));
           }
         } catch (err) {}
