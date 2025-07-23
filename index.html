@@ -60,7 +60,7 @@
 
   <script>
     const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict"; 
-    const authToken = "{{HF_AUTH_TOKEN}}";
+    const authToken = "";
     let videoStream;
 
     function timeoutPromise(ms) {
@@ -173,7 +173,6 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": authToken,
       },
       body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
     });

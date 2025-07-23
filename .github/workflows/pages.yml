@@ -23,13 +23,6 @@ jobs:
         with:
           node-version: 16
 
-      - name: Inject Hugging Face Token
-        env:
-          HF_AUTH_TOKEN: ${{ secrets.HF_AUTH_TOKEN }}
-        run: |
-          npm install fs path
-          node scripts/inject-token.js
-
       - name: Build Static Site
         run: |
           mkdir -p _site
