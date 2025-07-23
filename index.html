@@ -40,6 +40,7 @@
 
     <input type="text" id="additionalText" placeholder="Enter text" />
     <button onclick="handleMethodChange()">Process Image</button>
+    <progress id="progressBar" value="0" max="100" style="width: 100%; display: none; margin-top: 10px;"></progress>
 
     <div class="instructions">
       <h3>Instructions:</h3>
@@ -137,75 +138,94 @@
     }
 
     async function handleMethodChange() {
-      const inputImageElement = document.getElementById("inputImage");
-      const inputImageSrc = inputImageElement.src;
-      const additionalText = document.getElementById("additionalText").value.trim();
+  const inputImageElement = document.getElementById("inputImage");
+  const inputImageSrc = inputImageElement.src;
+  const additionalText = document.getElementById("additionalText").value.trim();
+  const progressBar = document.getElementById("progressBar");
+  const resultDiv = document.getElementById("result");
 
-      if (!additionalText) {
-        alert("Please enter text before processing the image.");
-        return;
-      }
+  resultDiv.innerHTML = "";
+  progressBar.style.display = "block";
+  progressBar.value = 0;
 
-      let base64Image;
-      if (inputImageSrc.startsWith('data:image')) {
-        base64Image = inputImageSrc.split(',')[1];
+  if (!additionalText) {
+    alert("Please enter text before processing the image.");
+    return;
+  }
+
+  let base64Image;
+  if (inputImageSrc.startsWith('data:image')) {
+    base64Image = inputImageSrc.split(',')[1];
+  } else {
+    base64Image = await fetch(inputImageSrc)
+      .then(response => response.blob())
+      .then(blob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }));
+  }
+
+  let eventId;
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": authToken,
+      },
+      body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
+    });
+    const data = await response.json();
+    eventId = data.event_id;
+    resultDiv.innerHTML = `<p><strong>Event ID:</strong> ${eventId}</p>`;
+  } catch (err) {
+    progressBar.style.display = "none";
+    resultDiv.innerHTML = `<p class="error-message">Failed to send initial request. Backend may be offline.</p>`;
+    return;
+  }
+
+  let retries = 0;
+  const maxRetries = 20;
+  const delay = 3000;
+
+  async function tryFetchResult() {
+    try {
+      const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": authToken,
+        },
+      });
+
+      const resultText = await resultResponse.text();
+
+      if (resultResponse.status === 200 && resultText.includes('data:')) {
+        const dataLine = resultText.split('\n').find(line => line.startsWith('data: '));
+        const jsonData = JSON.parse(dataLine.substring(6).trim());
+        const processedImageBase64 = jsonData[0].output;
+
+        progressBar.style.display = "none";
+        resultDiv.innerHTML += `<img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>`;
       } else {
-        base64Image = await fetch(inputImageSrc)
-          .then(response => response.blob())
-          .then(blob => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          }));
+        throw new Error("Not ready yet");
       }
-
-      try {
-        const response = await fetchWithTimeoutAndRetry(() => fetch(apiUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": authToken,
-          },
-          body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
-        }));
-
-        const data = await response.json();
-        const eventId = data.event_id;
-
-        document.getElementById("result").innerHTML = `
-          <p><strong>Event ID:</strong> ${eventId}</p>
-        `;
-
-        const resultResponse = await fetch(`${apiUrl}/${eventId}`, {
-          method: "GET",
-          headers: {
-            "Authorization": authToken,
-          },
-        });
-
-        const resultText = await resultResponse.text();
-
-        if (resultResponse.status === 200 && resultText.includes('data:')) {
-          const dataLine = resultText.split('\n').find(line => line.startsWith('data: '));
-          const jsonData = JSON.parse(dataLine.substring(6).trim());
-          const processedImageBase64 = jsonData[0].output;
-
-          document.getElementById("result").innerHTML += `
-            <img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>
-          `;
-        } else {
-          throw new Error("Processed image data not found.");
-        }
-      } catch (error) {
-        document.getElementById("result").innerHTML = `
-          <p class="error-message">
-            An error occurred while processing the image. <br>
-            <strong>Error Details:</strong> ${error.message || "Unknown error"}
-          </p>
-        `;
+    } catch (error) {
+      retries++;
+      progressBar.value = Math.min(100, (retries / maxRetries) * 100);
+      if (retries < maxRetries) {
+        setTimeout(tryFetchResult, delay);
+      } else {
+        progressBar.style.display = "none";
+        resultDiv.innerHTML += `<p class="error-message">Backend did not respond in time. Try again shortly.</p>`;
       }
     }
+  }
+
+  tryFetchResult();
+}
+
   </script>
 </body>
 </html>
