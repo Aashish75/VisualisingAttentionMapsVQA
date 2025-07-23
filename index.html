@@ -39,27 +39,14 @@
     </div>
 
     <input type="text" id="additionalText" placeholder="Enter text" />
-    <button onclick="handleMethodChange()">Process Image</button>
+    <button onclick="autoProcessImage()">Process Image</button>
     <progress id="progressBar" value="0" max="100" style="width: 100%; display: none; margin-top: 10px;"></progress>
     <div id="info" class="info-message"></div>
-
-    <div class="instructions">
-      <h3>Instructions:</h3>
-      <ul>
-        <li>✅ We recommend using the <strong>default image</strong> to begin with (it’s small and quick to process).</li>
-        <li>✅ Type some <strong>relevant text</strong> in the input field.</li>
-        <li>✅ Click on <strong>Process</strong> and wait for the results.</li>
-        <li>⏳ If you don’t see the Event ID or the output visualization, the backend app may still be initializing. <strong>Wait for 5 minutes</strong> and try again.</li>
-        <li>🧠 This uses a <strong>Grad-CAM based approach</strong> for visualizing attention in Visual Question Answering.</li>
-        <li>🚀 Backend runs on <strong>Hugging Face Spaces</strong> and frontend is built with <strong>HTML, CSS, and JavaScript</strong>.</li>
-      </ul>
-    </div>
-
     <div id="result" class="result"></div>
   </div>
 
   <script>
-    const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict"; 
+    const apiUrl = "https://aashish75-attentionvisualisationvqa.hf.space/gradio_api/call/predict";
     let videoStream;
 
     function handleImageInputChange() {
@@ -71,37 +58,28 @@
       videoElement.style.display = "none";
       captureButton.style.display = "none";
 
-      if (inputType === "default") {
-        inputImage.src = "default-image.jpg";
-      } else if (inputType === "ex1") {
-        inputImage.src = "example1.png";
-      } else if (inputType === "ex2") {
-        inputImage.src = "example2.png";
-      } else if (inputType === "upload") {
+      if (inputType === "default") inputImage.src = "default-image.jpg";
+      else if (inputType === "ex1") inputImage.src = "example1.png";
+      else if (inputType === "ex2") inputImage.src = "example2.png";
+      else if (inputType === "upload") {
         const inputFile = document.createElement("input");
         inputFile.type = "file";
         inputFile.accept = "image/*";
         inputFile.onchange = (e) => {
           const file = e.target.files[0];
           const reader = new FileReader();
-          reader.onload = function(event) {
-            inputImage.src = event.target.result;
-          };
+          reader.onload = function(event) { inputImage.src = event.target.result; };
           reader.readAsDataURL(file);
         };
         inputFile.click();
       } else if (inputType === "camera") {
         videoElement.style.display = "block";
         captureButton.style.display = "block";
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-            videoStream = stream;
-            videoElement.srcObject = stream;
-            videoElement.play();
-          });
-        } else {
-          alert("Camera is not supported on this device");
-        }
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          videoStream = stream;
+          videoElement.srcObject = stream;
+          videoElement.play();
+        });
       }
     }
 
@@ -111,15 +89,12 @@
       const canvas = document.createElement("canvas");
       canvas.width = videoElement.videoWidth;
       canvas.height = videoElement.videoHeight;
-      const context = canvas.getContext("2d");
-      context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+      canvas.getContext("2d").drawImage(videoElement, 0, 0);
       inputImage.src = canvas.toDataURL("image/png");
       videoStream.getTracks().forEach(track => track.stop());
-      videoElement.style.display = "none";
-      document.getElementById("captureButton").style.display = "none";
     }
 
-    async function handleMethodChange() {
+    async function autoProcessImage() {
       const inputImageElement = document.getElementById("inputImage");
       const inputImageSrc = inputImageElement.src;
       const additionalText = document.getElementById("additionalText").value.trim();
@@ -128,89 +103,68 @@
       const infoDiv = document.getElementById("info");
 
       resultDiv.innerHTML = "";
+      infoDiv.innerText = "\ud83d\ude80 Waking up the backend...\nPlease wait \u231b\n";
       progressBar.style.display = "block";
       progressBar.value = 0;
-      infoDiv.textContent = "🚀 Waking up the backend...\nPlease wait ⏳\n";
-
-      if (!additionalText) {
-        alert("Please enter text before processing the image.");
-        return;
-      }
+      if (!additionalText) return alert("Please enter text.");
 
       let base64Image;
-      if (inputImageSrc.startsWith('data:image')) {
-        base64Image = inputImageSrc.split(',')[1];
-      } else {
-        base64Image = await fetch(inputImageSrc)
-          .then(response => response.blob())
-          .then(blob => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-          }));
-      }
+      if (inputImageSrc.startsWith("data:image")) base64Image = inputImageSrc.split(",")[1];
+      else base64Image = await fetch(inputImageSrc).then(r => r.blob()).then(blob => new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res(reader.result.split(",")[1]);
+        reader.onerror = rej;
+        reader.readAsDataURL(blob);
+      }));
 
-      const maxCycles = 3;
-      const pollRetries = 20;
-      const pollDelay = 3000;
-      const cycleDelay = 10000;
-      let gotResult = false;
+      const maxTries = 3;
+      let attempt = 1;
 
-      for (let cycle = 1; cycle <= maxCycles && !gotResult; cycle++) {
-        infoDiv.textContent += `\nAttempt ${cycle} of ${maxCycles}...\n`;
+      async function tryCycle() {
+        infoDiv.innerText += `Attempt ${attempt} of ${maxTries}...\n`;
+
         try {
-          const postResponse = await fetch(apiUrl, {
+          const postResp = await fetch(apiUrl, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ data: [base64Image, "method1", additionalText] }),
+            body: JSON.stringify({ data: [base64Image, "method1", additionalText] })
           });
-          const data = await postResponse.json();
+          const data = await postResp.json();
           const eventId = data.event_id;
-          resultDiv.innerHTML = `<p><strong>Event ID (try ${cycle}):</strong> ${eventId}</p>`;
+          resultDiv.innerHTML = `<p><strong>Event ID (try ${attempt}):</strong> ${eventId}</p>`;
 
-          let retries = 0;
-          while (retries < pollRetries && !gotResult) {
-            try {
-              const resultResponse = await fetch(`${apiUrl}/${eventId}`);
-              const resultText = await resultResponse.text();
-
-              if (resultResponse.status === 200 && resultText.includes('data:')) {
-                const dataLine = resultText.split('\n').find(line => line.startsWith('data: '));
-                const jsonData = JSON.parse(dataLine.substring(6).trim());
-                const processedImageBase64 = jsonData[0].output;
-
-                progressBar.style.display = "none";
-                infoDiv.textContent = "";
-                resultDiv.innerHTML += `<img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>`;
-                gotResult = true;
-              }
-            } catch (e) {
-              infoDiv.textContent += `Polling attempt ${retries + 1} failed...\n`;
+          let done = false;
+          for (let i = 0; i < 20 && !done; i++) {
+            progressBar.value = Math.min(100, (attempt - 1) * 30 + i * 1.5);
+            const poll = await fetch(`${apiUrl}/${eventId}`);
+            const txt = await poll.text();
+            if (poll.status === 200 && txt.includes("data:")) {
+              const dataLine = txt.split("\n").find(line => line.startsWith("data: "));
+              const jsonData = JSON.parse(dataLine.substring(6).trim());
+              const processedImageBase64 = jsonData[0].output;
+              progressBar.style.display = "none";
+              infoDiv.innerText = "";
+              resultDiv.innerHTML += `<img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>`;
+              done = true;
+              return;
             }
-
-            const cycleStart = cycle === 1 ? 0 : (cycle === 2 ? 75 : 90);
-            const cycleEnd = cycle === 1 ? 75 : (cycle === 2 ? 90 : 100);
-            progressBar.value = cycleStart + ((cycleEnd - cycleStart) * (retries / pollRetries));
-
-            retries++;
-            await new Promise(res => setTimeout(res, pollDelay));
+            await new Promise(res => setTimeout(res, 3000));
           }
         } catch (err) {
-          infoDiv.textContent += `POST request failed in cycle ${cycle}\n`;
+          infoDiv.innerText += `Error in attempt ${attempt}.\n`;
         }
 
-        if (!gotResult && cycle < maxCycles) {
-          infoDiv.textContent += `Retrying in 10 seconds...\n`;
-          await new Promise(res => setTimeout(res, cycleDelay));
+        if (attempt < maxTries) {
+          attempt++;
+          await new Promise(res => setTimeout(res, 10000));
+          tryCycle();
+        } else {
+          progressBar.style.display = "none";
+          infoDiv.innerText += "\n❌ Failed to process image. Try again later.";
         }
       }
 
-      if (!gotResult) {
-        progressBar.style.display = "none";
-        infoDiv.textContent = "";
-        resultDiv.innerHTML += `<p class="error-message">❌ Backend didn’t respond in time. Please try again later.</p>`;
-      }
+      tryCycle();
     }
   </script>
 </body>
