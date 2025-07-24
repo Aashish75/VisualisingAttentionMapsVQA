@@ -125,7 +125,7 @@
       <li>We recommend using the <strong>default image</strong> to begin with (it's small and quick to process).</li>
       <li>Type some <strong>relevant text</strong> in the input field.</li>
       <li>Click on <strong>Process Image</strong> and wait for the results.</li>
-      <li>If you don't see the Event ID or the output visualization, the backend app may still be initializing. It takes upto <strong>30 seconds</strong> for the backend to initialize.</li>
+      <li>If you don't see the Event ID or the output visualization, the backend app may still be initializing. It takes upto <strong>35 seconds</strong> for the backend to initialize.</li>
       <li>This uses a <strong>Grad-CAM based approach</strong> for visualizing attention in Visual Question Answering.</li>
       <li>Backend runs on <strong>Hugging Face Spaces (gradio app)</strong> and frontend is built with <strong>HTML, CSS, and JavaScript</strong>.</li>
     </ul>
@@ -202,7 +202,7 @@
       const infoDiv = document.getElementById("info");
 
       resultDiv.innerHTML = "";
-      infoDiv.innerText = "🚀 Waking up the HF space...\nPlease wait ⌛\n";
+      infoDiv.innerText = "🚀 Waking up the HF space...\nPlease wait. This might take upto 35 seconds. ⌛\n";
       progressBar.style.display = "block";
       progressBar.value = 0;
       if (!additionalText) return alert("Please enter text.");
