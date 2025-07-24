@@ -172,15 +172,26 @@
     }
 
     function captureImage() {
-      const videoElement = document.getElementById("video");
-      const inputImage = document.getElementById("inputImage");
-      const canvas = document.createElement("canvas");
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-      canvas.getContext("2d").drawImage(videoElement, 0, 0);
-      inputImage.src = canvas.toDataURL("image/png");
-      videoStream.getTracks().forEach((track) => track.stop());
-    }
+  const videoElement = document.getElementById("video");
+  const inputImage = document.getElementById("inputImage");
+  const canvas = document.createElement("canvas");
+
+  canvas.width = videoElement.videoWidth;
+  canvas.height = videoElement.videoHeight;
+  canvas.getContext("2d").drawImage(videoElement, 0, 0);
+
+  // Set captured image as source
+  inputImage.src = canvas.toDataURL("image/png");
+
+  // Stop and clear the stream
+  videoStream.getTracks().forEach(track => track.stop());
+  videoElement.srcObject = null;
+
+  // Hide video element and capture button
+  videoElement.style.display = "none";
+  document.getElementById("captureButton").style.display = "none";
+}
+
 
     async function autoProcessImage() {
       const inputImageElement = document.getElementById("inputImage");
