@@ -103,7 +103,7 @@
       const infoDiv = document.getElementById("info");
 
       resultDiv.innerHTML = "";
-      infoDiv.innerText = "\ud83d\ude80 Waking up the backend...\nPlease wait \u231b\n";
+      infoDiv.innerText = "🚀 Waking up the HF space...\nPlease wait ⏳\n";
       progressBar.style.display = "block";
       progressBar.value = 0;
       if (!additionalText) return alert("Please enter text.");
@@ -135,14 +135,20 @@
 
           let done = false;
           for (let i = 0; i < 20 && !done; i++) {
-            progressBar.value = Math.min(100, (attempt - 1) * 30 + i * 1.5);
+            // Progress targets per attempt
+            const maxTarget = attempt === 1 ? 60 : attempt === 2 ? 90 : 98;
+            const step = maxTarget / 20;
+            progressBar.value = Math.min(maxTarget, progressBar.value + step);
+
             const poll = await fetch(`${apiUrl}/${eventId}`);
             const txt = await poll.text();
             if (poll.status === 200 && txt.includes("data:")) {
               const dataLine = txt.split("\n").find(line => line.startsWith("data: "));
               const jsonData = JSON.parse(dataLine.substring(6).trim());
               const processedImageBase64 = jsonData[0].output;
-              progressBar.style.display = "none";
+
+              progressBar.value = 100;
+              setTimeout(() => progressBar.style.display = "none", 500);
               infoDiv.innerText = "";
               resultDiv.innerHTML += `<img src="data:image/png;base64,${processedImageBase64}" class="image-display" alt="Processed Image"/>`;
               done = true;
@@ -151,7 +157,7 @@
             await new Promise(res => setTimeout(res, 3000));
           }
         } catch (err) {
-          infoDiv.innerText += `Error in attempt ${attempt}.\n`;
+          infoDiv.innerText += `Retrying...\n`;
         }
 
         if (attempt < maxTries) {
